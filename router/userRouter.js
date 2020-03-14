@@ -12,6 +12,6 @@ router.post('/loginPrt',userController.parentLogin)
 router.post('/regParent',userController.parentRegister)
 router.post('/keepsign',auth,userController.keepLogin)
 router.post('/emailVerification/',auth,userController.emailVerification)
-router.post('/resendVerification/',userController.resendVerification)
+router.post('/resendVerification/',auth,userController.resendVerification)
 
 module.exports = router

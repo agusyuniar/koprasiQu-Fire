@@ -16,9 +16,10 @@ app.get('/', (req,res)=>{
     res.status(200).send(`<h1>Welcome to ${PORT}</h1>`)
 })
 
-const { userRouter, profileRouter } = require('./router')
+const { userRouter, profileRouter, productRouter } = require('./router')
 
 app.use('/user',userRouter)
 app.use('/profile',profileRouter)
+app.use('/product',productRouter)
 
 app.listen(PORT, ()=> console.log(PORT));
