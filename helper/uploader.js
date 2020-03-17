@@ -23,12 +23,12 @@ module.exports = {
                 let ext = originalname.split('.')
                 var d = new Date()
                 var middlePrefix = d.getFullYear()+d.getDate().toString()+'_'+d.getMinutes()
-                // let filename = fileNamePrefix + Date.now() + '.' + ext[ext.length-1]
-                let filename = fileNamePrefix + req.user.id + middlePrefix + '.' + ext[ext.length-1]
+                let filename = fileNamePrefix + Date.now() + '.' + ext[ext.length-1]
+                // let filename = fileNamePrefix + req.user.id + middlePrefix + '.' + ext[ext.length-1]
                 cb(null, filename) 
                 console.log('filename func \n');
                 console.log(middlePrefix)
-                console.log(req.user.id);
+                // console.log(req.user.id);
                 console.log(cb);
                 console.log(ext);
                 console.log(fileNamePrefix);
