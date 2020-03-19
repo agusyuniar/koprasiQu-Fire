@@ -14,19 +14,35 @@ module.exports = {
 
     getStudentData: (req, res) => {
         const script = `select * from murid`
-
+        
         myDB.query(script, (err, results) => {
             if (err) return res.status(500).send(err)
+        
+            res.status(202).send(results)
+            
+        })
+        //     myDB.query(script, (err, results) => {
+        //     if (err) return res.status(500).send(err)
 
-            if (results && results.length > 0) {
-                let { id, nim, password, firstname, lastname, alamat } = results[0]
-                const token = createJWTtoken({ id, nim, password, firstname, lastname, alamat })
-                return res.status(200).send({
-                    id, nim, password, firstname, lastname, alamat
-                })
-            } else {
-                res.status(202).send(results)
-            }
+        //     if (results && results.length > 0) {
+        //         let { id, nim, password, firstname, lastname, alamat } = results[0]
+        //         const token = createJWTtoken({ id, nim, password, firstname, lastname, alamat })
+        //         return res.status(200).send({
+        //             id, nim, password, firstname, lastname, alamat, token
+        //         })
+        //     } else {
+        //         res.status(202).send(results,token)
+        //     }
+        // })
+    },
+    getStudentByIdOrtu: (req, res) => {
+        const script = `select * from murid where id_ortu = ${myDB.escape(req.body.id)}`
+        
+        myDB.query(script, (err, results) => {
+            if (err) return res.status(500).send(err)
+        
+            res.status(202).send(results)
+            
         })
     },
     studentLogin: (req, res) => {
@@ -37,7 +53,7 @@ module.exports = {
             if (err) {
                 return res.status(500).send(err)
             }
-            res.status(202).send(results)
+            res.status(202).send({results})
         })
     },
 
