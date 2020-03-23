@@ -12,5 +12,10 @@ router.post('/addProductImage',productController.addProductImage)
 router.put('/editProduct',productController.editProduct)
 router.delete('/deleteProduct/:id',productController.deleteProduct)
 router.post('/addParentCart',productController.addToParentCart)
+router.get('/cartByParent/:id',productController.getCartbyParent)
+router.delete('/deleteCartId/:id',productController.deleteCartbyId)
+router.put('/chekcoutCart',productController.cartCheckOut)
+router.put('/checkoutOrder',productController.makeOrderCheckout)
+router.get('/gettransaction/:id',productController.getTransaction)
 
 module.exports = router

@@ -35,28 +35,62 @@ module.exports = {
         //     }
         // })
     },
-    getStudentByIdOrtu: (req, res) => {
-        const script = `select * from murid where id_ortu = ${myDB.escape(req.body.id)}`
+
+    studentEdit: (req, res) => {
+        console.log('reqBody kirim: ', req.body);
+        // const { nim, password } = req.body
+        const script = `UPDATE murid SET ? WHERE id = ${myDB.escape(req.body.id)};`
+        myDB.query(script, req.body, (err, results) => {
+            if(err) return res.status(500).send({ message: 'Gagal Update', err })
+            console.log(myDB.query);
+            
+            console.log('err?: ', err);
+            console.log('results?: ', results);
+
+
+            res.status(200).send({ message: 'Berhasil Edit', results })
+        })
+    },    
+
+    getStudentByEmailOrtu: (req, res) => {
+        console.log('mail: ',req.params);
+        
+        const script = `select * from murid where email_ortu = ${myDB.escape(req.params.email)}`
         
         myDB.query(script, (err, results) => {
             if (err) return res.status(500).send(err)
         
             res.status(202).send(results)
-            
+        
         })
     },
+
     studentLogin: (req, res) => {
-        const { nim, password } = req.body
-        let script = `select * from murid where nim = ${myDB.escape(nim)} and password = ${myDB.escape(password)}`
+        console.log('idMuridmsk: ',req.body);
+        
+        let { nim, password } = req.body;
+        password = crypto.createHmac('sha256', kunci)
+            .update(password)
+            .digest('hex')
+
+        console.log((req.body));
+
+        var script = `select * from murid 
+                        where nim = ${myDB.escape(nim)} 
+                        and password = ${myDB.escape(password)}`;
 
         myDB.query(script, (err, results) => {
-            if (err) {
-                return res.status(500).send(err)
+            if (err) return res.status(500).send({ err, message: 'Database err' })
+            if (results.length === 0) {
+                return res.status(500).send({ err, message: 'Username or password incorrect' })
             }
-            res.status(202).send({results})
+            console.log(results[0]);
+            
+            var token = createJWTtoken({ ...results[0] })
+            res.status(200).send({ message: 'login success', ...results[0], token })
+
         })
     },
-
 
 
     getParentData: (req, res) => {
@@ -327,5 +361,58 @@ module.exports = {
                 })
             })
         })
-    }
+    },
+
+    studentRegister: (req, res) => {
+        console.log('regMurid: ',req.body);
+        
+        req.body.password = crypto.createHmac('sha256', kunci)
+            .update(req.body.password)
+            .digest('hex');
+        req.body.role_id = 4
+        req.body.saldo = 0
+        req.body.profil_img = '/image/profile/default/avatar.png'
+        let scriptceknim = `select * from murid
+                        where nim = ${myDB.escape(req.body.nim)}`
+        myDB.query(scriptceknim, (err2, resultsnim) => {
+            console.log('cekemail: ', resultsnim);
+            if (err2) return res.status(500).send({ message: 'Database Error! (email)', err2, error: true })
+            
+
+                let scriptregis = `INSERT INTO murid SET ? `
+                myDB.query(scriptregis, req.body, (err, results) => {
+                    console.log('resultsReg :', err);
+                    console.log('script :', req.body);
+
+                    if (err) return res.status(500).send({ message: 'Database Error ! (insert)', err, error: true })
+
+                    // var { username, password } = req.body
+                    // var token = createJWTtoken({ username, password })
+                    // var verificationLink = `http://localhost:3000/verify?${token}`
+                    // var mailOption = {
+                    //     from: "Koprasiqu <uu.niar@gmail.com>",
+                    //     to: req.body.email,
+                    //     subject: "Email Confirmation",
+                    //     html: `
+                    //     <h2>Selamat bergabung di aplikasi KOPRASIQU</h2> \n
+                    //     <p>Untuk menggunakan Koprasiqu secara maksimal, silakan klik link dibawah</p>\n
+                    //     <a href='${verificationLink}'>
+                    //         Klik untuk melakukan verifikasi
+                    //     </a>\n\n
+                    //     <p>Jika link diatas tidak dapat dibuka, silakan klik / copy link berikut di browser anda</p>\n
+                    //     ${verificationLink}
+                    //     <p>Anda dapat melihat detail setiap anak yg terdaftar sesuai email anda ketika anda sudah terverifikasi!</p>
+                    //     `
+                    // }
+
+                    // transporter.sendMail(mailOption, (err, results) => {
+                    //     if (err) return res.status(500).send({ message: 'Gagal mengirim email verivikasi!', err, error: false, email: req.body.email })
+
+                        // res.status(200).send({ status: 'Email verifikasi terkirim', result: results, email: req.body.email })
+                    // })
+                    res.status(200).send({ result: results, nim: req.body.nim })
+                })
+           
+        })
+    },
 }

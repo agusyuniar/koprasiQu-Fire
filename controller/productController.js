@@ -206,16 +206,20 @@ module.exports = {
 
     addToParentCart:(req,res) => {
         console.log('reqDiterima: \n',req.body);
-        
-        const script = `select * from cart where product_id = ${myDB.escape(req.body.product_id)} and id_ortu = ${myDB.escape(req.body.id_ortu)}`
+        req.body.transaction_time=0
+        const script = `select * from cart where product_id = ${myDB.escape(req.body.product_id)} and id_ortu = ${myDB.escape(req.body.id_ortu)} and checkout = 0`
         myDB.query(script,(err,results)=>{
-            console.log(results[0]);
+            console.log(err);
             console.log(results.length);
             
             if (err) return res.status(500).send({ message: 'gagal akses product', err })
-            if(results.length===0){
+            if(results.length==0){
+                // var {transaction_id, id_murid, checkout, method, virtaulaccount, paid, finish, transaction_time}=req.body
+                // transaction_id, id_murid, checkout, method, virtaulaccount, paid, finish, transaction_time = 0
                 const script1 = `insert into cart set ?`
                 myDB.query(script1, req.body, (err,results1)=>{
+                    console.log(err);
+                    
                     if (err) return res.status(500).send({ message: 'gagal menambah cart', err })
                     
                     res.status(200).send(results1)
@@ -230,6 +234,59 @@ module.exports = {
                 })
             }
         })
-    }
-    // getCartby
+    },
+    getCartbyParent:(req,res)=>{
+        console.log('idMasuk: ',req.params);
+        const script = `select * from cart where id_ortu = ${myDB.escape(req.params.id)} AND checkout = 0`
+        myDB.query(script,(err,results)=>{
+            if(err) return res.status(500).send({message:'gagal ambil cart',err})
+            res.status(200).send(results)
+        })
+    },
+    deleteCartbyId:(req,res)=>{
+        console.log('idMasuk: ',req.params);
+        const script = `delete from cart where id = ${myDB.escape(req.params.id)}`
+        myDB.query(script,(err,results)=>{
+            if(err) return res.status(500).send({message:'gagal delete cart',err})
+            res.status(200).send(results)
+        })
+    },
+    cartCheckOut:(req,res)=>{
+        console.log('reqMasuk: ',req.body);
+        const script = `UPDATE cart SET id_murid = ${myDB.escape(req.body.id_murid)} WHERE id_ortu = ${myDB.escape(req.body.id_ortu)} and product_id = ${myDB.escape(req.body.product_id)} and checkout = 0`
+        myDB.query(script,req.body,(err,results)=>{
+            if(err) return res.status(500).send({message:'gagal checkout cart',err})
+            res.status(200).send(results)
+        })
+    },
+    makeOrderCheckout:(req,res)=>{
+        console.log('reqMskOrder: ',req.body);
+        var d = new Date()
+        
+        var trx_date = d.getDate().toString() + '-' + d.getMonth().toString() + '-' + d.getFullYear().toString() + ' / ' + d.getHours().toString() + ':' + d.getMinutes().toString()
+        console.log(trx_date);
+            
+        const script = `UPDATE cart SET 
+                transaction_id = ${myDB.escape(req.body.trx_id)}, 
+                virtualaccount = ${myDB.escape(req.body.va)}, 
+                method=${myDB.escape(req.body.method)} ,
+                transaction_time = "${trx_date}" ,
+                checkout = 1
+                WHERE id_ortu = ${myDB.escape(req.body.id_ortu)} and checkout = 0 
+                `
+        myDB.query(script, req.body, (err,results)=>{
+            if(err) return res.status(500).send({message:'checkout Failed',err})
+
+            // res.status(200).send(results)
+            res.status(200).send({message:'Checkout success',results})
+        })
+    },
+    getTransaction:(req,res)=>{
+        console.log('idMasuk: ',req.params);
+        const script = `select * from cart where id_ortu = ${myDB.escape(req.params.id)} AND checkout = 1`
+        myDB.query(script,(err,results)=>{
+            if(err) return res.status(500).send({message:'gagal ambil cart',err})
+            res.status(200).send(results)
+        })
+    },
 }
