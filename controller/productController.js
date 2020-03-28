@@ -33,6 +33,30 @@ module.exports = {
             // const script2` = ``
         })
     },
+    searchProductbyName: (req,res) => {
+        console.log('search: ',req.params.search);
+        
+        const script = `select p.*,
+        json_arrayagg(json_object('img',pi.img_path, 'id',pi.id)) as images
+        from products p
+        left join product_img pi
+        on p.id = pi.product_id
+        where p.nama_product like '%${req.params.search}%'
+        group by p.id
+        
+        ;`
+
+        myDB.query(script,(err,results)=>{
+            console.log('err: ',err);
+            console.log('result: ',results);
+            
+            if(err) return res.status(500).send({message:'gagal memuat product'})
+            console.log(results);
+
+            res.status(200).send(results)                
+            // const script2` = ``
+        })
+    },
     getProductById: (req,res) => {
         // console.log('Params: ',req.params);
         

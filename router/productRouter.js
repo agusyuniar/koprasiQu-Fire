@@ -4,6 +4,7 @@ const { productController } = require('../controller')
 const router = express.Router()
 
 router.get('/getProduct',productController.getAllProduct)
+router.get('/searchProductbyName/:search',productController.searchProductbyName)
 router.get('/getProductByID/:id',productController.getProductById)
 router.put('/editImageID/:id',productController.editImageById)
 router.delete('/deleteImageID/:id',productController.deleteImageById)

@@ -97,7 +97,7 @@ module.exports = {
         const script = `select 
                         o.*, 
                         m.nim, concat(m.firstname,' ',m.lastname) as nama_murid, m.alamat , 
-                        json_arrayagg(json_object('email_ortu',m.email_ortu,"nim",m.nim, 'nama',concat(m.firstname,' ',m.lastname),'profil_img',m.profil_img, 'alamat', m.alamat,'saldo',m.saldo, 'id_ortu',m.id_ortu)) as anak
+                        json_arrayagg(json_object('email_ortu',m.email_ortu,"nim",m.nim, 'nama',concat(m.firstname,' ',m.lastname),'profil_img',m.profil_img, 'alamat', m.alamat,'saldo',m.saldo)) as anak
                         from orangtua o 
                         left join murid m 
                         on o.email = m.email_ortu 
@@ -115,6 +115,18 @@ module.exports = {
         console.log('img : ', req.params);
 
         const script = `select profil_img from orangtua where id = ${myDB.escape(req.params.id)}`
+
+        myDB.query(script, (err, results) => {
+            if (err) {
+                return res.status(500).send(err)
+            }
+            res.status(202).send(results)
+        })
+    },
+    getStudentImgData: (req, res) => {
+        console.log('img : ', req.params);
+
+        const script = `select profil_img from murid where id = ${myDB.escape(req.params.id)}`
 
         myDB.query(script, (err, results) => {
             if (err) {
@@ -144,7 +156,7 @@ module.exports = {
             var script2 = `
                     select 
                     o.*,
-                    json_arrayagg(json_object('email_ortu',m.email_ortu,"nim",m.nim, 'nama',concat(m.firstname,' ',m.lastname),'profil_img',m.profil_img, 'alamat', m.alamat,'saldo',m.saldo, 'id_ortu',m.id_ortu)) as anak
+                    json_arrayagg(json_object('email_ortu',m.email_ortu,"nim",m.nim, 'nama',concat(m.firstname,' ',m.lastname),'profil_img',m.profil_img, 'alamat', m.alamat,'saldo',m.saldo)) as anak
                     from orangtua o 
                     left join murid m 
                     on o.email = m.email_ortu  
@@ -152,6 +164,8 @@ module.exports = {
                         `
 
             myDB.query(script2, (err, results2) => {
+                console.log(err);
+                
                 if (err) return res.status(500).send({ err, message: 'Gagal koneksi ke database' })
 
                 if (results2.length === 0) {
